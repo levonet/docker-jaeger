@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<yandex>
+    <zookeeper replace="1">
+        <node index="1">
+            <host>172.16.254.10</host>
+            <port>2181</port>
+        </node>
+        <node index="2">
+            <host>172.16.254.11</host>
+            <port>2181</port>
+        </node>
+        <node index="3">
+            <host>172.16.254.12</host>
+            <port>2181</port>
+        </node>
+    </zookeeper>
+</yandex>

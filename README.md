@@ -8,6 +8,17 @@ These Jaeger Docker images contain a [clickhouse plugin](https://github.com/jaeg
 - [levonet/jaeger-ingester](https://hub.docker.com/r/levonet/jaeger-ingester) — An alternative to collector; reads spans from Kafka topic and saves them to storage.
 - [levonet/jaeger-query](https://hub.docker.com/r/levonet/jaeger-query) — Serves Jaeger UI and an API that retrieves traces from storage.
 
+# Example
+
+Run the Clickhouse claster (2 shards x 2 replicas) with the Jaeger cluster:
+
+```sh
+cd examples/cluster
+docker-compose up
+```
+
+Open the link [0.0.0.0:8080](http://0.0.0.0:8080) in your browser and test it.
+
 # Image Variants
 
 The `levonet/jaeger*` images come in many flavors, each designed for a specific use case.

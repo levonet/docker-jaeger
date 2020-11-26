@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<yandex>
+    <interserver_http_host replace="1">172.16.254.22</interserver_http_host>
+    <logger replace="1">
+        <level>information</level>
+        <console>1</console>
+    </logger>
+    <http_server_default_response replace="1"><![CDATA[<html ng-app="SMI2"><head><base href="http://ui.tabix.io/"></head><body><div ui-view="" class="content-ui"></div><script src="http://loader.tabix.io/master.js"></script></body></html>]]></http_server_default_response>
+</yandex>

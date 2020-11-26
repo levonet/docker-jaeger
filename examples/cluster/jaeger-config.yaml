@@ -1,0 +1,8 @@
+---
+service_name: nginx
+reporter:
+  logSpans: true
+  localAgentHostPort: 172.16.254.40:6831
+sampler:
+  type: const
+  param: 1

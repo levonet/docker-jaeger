@@ -1,0 +1,230 @@
+version: "3.8"
+
+services:
+  zookeeper-1:
+    image: zookeeper:3.6
+    ports:
+    - "2181:2181"
+    environment:
+      ZOO_MY_ID: "1"
+      ZOO_SERVERS: server.1=0.0.0.0:2888:3888;2181 server.2=172.16.254.11:2888:3888;2181 server.3=172.16.254.12:2888:3888;2181
+    volumes:
+    - data-zookeeper-1:/data
+    - datalog-zookeeper-1:/datalog
+    networks:
+      jaeger-cluster:
+        ipv4_address: 172.16.254.10
+
+  zookeeper-2:
+    image: zookeeper:3.6
+    ports:
+    - "2182:2181"
+    environment:
+      ZOO_MY_ID: "2"
+      ZOO_SERVERS: server.1=172.16.254.10:2888:3888;2181 server.2=0.0.0.0:2888:3888;2181 server.3=172.16.254.12:2888:3888;2181
+    volumes:
+    - data-zookeeper-2:/data
+    - datalog-zookeeper-2:/datalog
+    networks:
+      jaeger-cluster:
+        ipv4_address: 172.16.254.11
+
+  zookeeper-3:
+    image: zookeeper:3.6
+    ports:
+    - "2183:2181"
+    environment:
+      ZOO_MY_ID: "3"
+      ZOO_SERVERS: server.1=172.16.254.10:2888:3888;2181 server.2=172.16.254.11:2888:3888;2181 server.3=0.0.0.0:2888:3888;2181
+    volumes:
+    - data-zookeeper-3:/data
+    - datalog-zookeeper-3:/datalog
+    networks:
+      jaeger-cluster:
+        ipv4_address: 172.16.254.12
+
+  clickhouse-s1-r1:
+    image: yandex/clickhouse-server
+    ports:
+    - "8123:8123"
+    - "9000:9000"
+    volumes:
+    - ./configs/clickhouse-s1-r1:/etc/clickhouse-server/conf.d
+    - data-clickhouse-s1-r1:/var/lib/clickhouse
+    restart: on-failure
+    networks:
+      jaeger-cluster:
+        ipv4_address: 172.16.254.20
+    depends_on: &clickhouse_depends_on
+    - zookeeper-1
+    - zookeeper-2
+    - zookeeper-3
+
+  clickhouse-s1-r2:
+    image: yandex/clickhouse-server
+    ports:
+    - "8124:8123"
+    - "9001:9000"
+    volumes:
+    - ./configs/clickhouse-s1-r2:/etc/clickhouse-server/conf.d
+    - data-clickhouse-s1-r2:/var/lib/clickhouse
+    restart: on-failure
+    networks:
+      jaeger-cluster:
+        ipv4_address: 172.16.254.21
+    depends_on: *clickhouse_depends_on
+
+  clickhouse-s2-r1:
+    image: yandex/clickhouse-server
+    ports:
+    - "8125:8123"
+    - "9002:9000"
+    volumes:
+    - ./configs/clickhouse-s2-r1:/etc/clickhouse-server/conf.d
+    - data-clickhouse-s2-r1:/var/lib/clickhouse
+    restart: on-failure
+    networks:
+      jaeger-cluster:
+        ipv4_address: 172.16.254.22
+    depends_on: *clickhouse_depends_on
+
+  clickhouse-s2-r2:
+    image: yandex/clickhouse-server
+    ports:
+    - "8126:8123"
+    - "9003:9000"
+    volumes:
+    - ./configs/clickhouse-s2-r2:/etc/clickhouse-server/conf.d
+    - data-clickhouse-s2-r2:/var/lib/clickhouse
+    restart: on-failure
+    networks:
+      jaeger-cluster:
+        ipv4_address: 172.16.254.23
+    depends_on: *clickhouse_depends_on
+
+  init-db:
+    build: ./init-db
+    command: /usr/local/bin/dockerize -wait tcp://172.16.254.20:8123 -wait tcp://172.16.254.21:8123 -wait tcp://172.16.254.22:8123 -wait tcp://172.16.254.23:8123 -timeout 60s /init-db.sh
+    environment:
+      INIT_DB_HOSTS: 172.16.254.20 172.16.254.21 172.16.254.22 172.16.254.23
+    volumes:
+    - ./sql:/sql
+    networks:
+    - jaeger-cluster
+    depends_on: &jaeger_depends_on
+    - clickhouse-s1-r1
+    - clickhouse-s1-r2
+    - clickhouse-s2-r1
+    - clickhouse-s2-r2
+
+  jaeger-collector-1:
+    image: levonet/jaeger-collector:latest
+    command: --clickhouse.datasource=tcp://172.16.254.20:9000?database=tracing&alt_hosts=172.16.254.21:9000,172.16.254.22:9000,172.16.254.23:9000 --clickhouse.index-table=jaeger_index_distributed --clickhouse.operations-table=jaeger_operations --clickhouse.spans-table=jaeger_spans_distributed --clickhouse-archive.enabled=true --clickhouse-archive.datasource=tcp://172.16.254.20:9000?database=tracing&alt_hosts=172.16.254.21:9000,172.16.254.22:9000,172.16.254.23:9000 --clickhouse-archive.spans-table=jaeger_archive_spans_distributed
+    environment:
+      SPAN_STORAGE_TYPE: clickhouse
+    ports:
+    - "14250:14250"  # accept model.proto
+    - "14268:14268"  # accept jaeger.thrift directly from clients
+    - "14269:14269"  # admin (health check, /metrics, etc.)
+    restart: on-failure
+    networks:
+      jaeger-cluster:
+        ipv4_address: 172.16.254.30
+    depends_on: *jaeger_depends_on
+
+  jaeger-collector-2:
+    image: levonet/jaeger-collector:latest
+    command: --clickhouse.datasource=tcp://172.16.254.22:9000?database=tracing&alt_hosts=172.16.254.23:9000,172.16.254.20:9000,172.16.254.21:9000 --clickhouse.index-table=jaeger_index_distributed --clickhouse.operations-table=jaeger_operations --clickhouse.spans-table=jaeger_spans_distributed --clickhouse-archive.enabled=true --clickhouse-archive.datasource=tcp://172.16.254.22:9000?database=tracing&alt_hosts=172.16.254.23:9000,172.16.254.20:9000,172.16.254.21:9000 --clickhouse-archive.spans-table=jaeger_archive_spans_distributed
+    environment:
+      SPAN_STORAGE_TYPE: clickhouse
+    ports:
+    - "24250:14250"  # accept model.proto
+    - "24268:14268"  # accept jaeger.thrift directly from clients
+    - "24269:14269"  # admin (health check, /metrics, etc.)
+    restart: on-failure
+    networks:
+      jaeger-cluster:
+        ipv4_address: 172.16.254.31
+    depends_on: *jaeger_depends_on
+
+  jaeger-agent:
+    image: levonet/jaeger-agent:latest
+    command: --reporter.grpc.host-port=172.16.254.30:14250,172.16.254.31:14250
+    ports:
+    - "6831:6831/udp"  # accept jaeger.thrift over compact thrift protocol
+    - "6832:6832/udp"  # accept jaeger.thrift over binary thrift protocol
+    - "5778:5778"      # serve configs
+    - "14271:14271"    # admin (health check, /metrics, etc.)
+    restart: on-failure
+    networks:
+      jaeger-cluster:
+        ipv4_address: 172.16.254.40
+    depends_on:
+    - jaeger-collector-1
+    - jaeger-collector-2
+
+  jaeger-query-1:
+    image: levonet/jaeger-query:latest
+    command: --clickhouse.datasource=tcp://172.16.254.21:9000?database=tracing&alt_hosts=172.16.254.23:9000 --clickhouse.index-table=jaeger_index_distributed --clickhouse.operations-table=jaeger_operations --clickhouse.spans-table=jaeger_spans_distributed --clickhouse-archive.enabled=true --clickhouse-archive.datasource=tcp://172.16.254.21:9000?database=tracing&alt_hosts=172.16.254.23:9000 --clickhouse-archive.spans-table=jaeger_archive_spans_distributed --query.static-files=/opt/jaeger-ui
+    environment:
+      SPAN_STORAGE_TYPE: clickhouse
+      JAEGER_AGENT_HOST: 172.16.254.40
+      JAEGER_AGENT_PORT: "6831"
+    ports:
+    - "16686:16686"  # serve frontend
+    - "16687:16687"  # admin (health check, /metrics, etc.)
+    restart: on-failure
+    networks:
+      jaeger-cluster:
+        ipv4_address: 172.16.254.50
+    depends_on: *jaeger_depends_on
+
+  jaeger-query-2:
+    image: levonet/jaeger-query:latest
+    command: --clickhouse.datasource=tcp://172.16.254.23:9000?database=tracing&alt_hosts=172.16.254.21:9000 --clickhouse.index-table=jaeger_index_distributed --clickhouse.operations-table=jaeger_operations --clickhouse.spans-table=jaeger_spans_distributed --clickhouse-archive.enabled=true --clickhouse-archive.datasource=tcp://172.16.254.23:9000?database=tracing&alt_hosts=172.16.254.21:9000 --clickhouse-archive.spans-table=jaeger_archive_spans_distributed --query.static-files=/opt/jaeger-ui
+    environment:
+      SPAN_STORAGE_TYPE: clickhouse
+      JAEGER_AGENT_HOST: 172.16.254.40
+      JAEGER_AGENT_PORT: "6831"
+    ports:
+    - "26686:16686"  # serve frontend
+    - "26687:16687"  # admin (health check, /metrics, etc.)
+    restart: on-failure
+    networks:
+      jaeger-cluster:
+        ipv4_address: 172.16.254.51
+    depends_on: *jaeger_depends_on
+
+  nginx:
+    image: levonet/nginx:latest
+    ports:
+    - "8080:8080"
+    volumes:
+    - ./nginx.conf:/etc/nginx/nginx.conf
+    - ./jaeger-config.yaml:/etc/nginx/jaeger-config.yaml
+    restart: on-failure
+    networks:
+      jaeger-cluster:
+        ipv4_address: 172.16.254.100
+    depends_on:
+    - jaeger-query-1
+    - jaeger-query-2
+
+networks:
+  jaeger-cluster:
+    ipam:
+      driver: default
+      config:
+      - subnet: "172.16.254.0/24"
+
+volumes:
+  data-zookeeper-1:
+  datalog-zookeeper-1:
+  data-zookeeper-2:
+  datalog-zookeeper-2:
+  data-zookeeper-3:
+  datalog-zookeeper-3:
+  data-clickhouse-s1-r1:
+  data-clickhouse-s1-r2:
+  data-clickhouse-s2-r1:
+  data-clickhouse-s2-r2:
