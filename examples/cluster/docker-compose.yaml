@@ -2,7 +2,7 @@ version: "3.8"
 
 services:
   zookeeper-1:
-    image: zookeeper:3.6
+    image: zookeeper:${ZOOKEEPER_TAG}
     ports:
     - "2181:2181"
     environment:
@@ -16,7 +16,7 @@ services:
         ipv4_address: 172.16.254.10
 
   zookeeper-2:
-    image: zookeeper:3.6
+    image: zookeeper:${ZOOKEEPER_TAG}
     ports:
     - "2182:2181"
     environment:
@@ -30,7 +30,7 @@ services:
         ipv4_address: 172.16.254.11
 
   zookeeper-3:
-    image: zookeeper:3.6
+    image: zookeeper:${ZOOKEEPER_TAG}
     ports:
     - "2183:2181"
     environment:
@@ -44,7 +44,7 @@ services:
         ipv4_address: 172.16.254.12
 
   clickhouse-s1-r1:
-    image: yandex/clickhouse-server
+    image: yandex/clickhouse-server:${CLICKHOUSE_TAG}
     ports:
     - "8123:8123"
     - "9000:9000"
@@ -61,7 +61,7 @@ services:
     - zookeeper-3
 
   clickhouse-s1-r2:
-    image: yandex/clickhouse-server
+    image: yandex/clickhouse-server:${CLICKHOUSE_TAG}
     ports:
     - "8124:8123"
     - "9001:9000"
@@ -75,7 +75,7 @@ services:
     depends_on: *clickhouse_depends_on
 
   clickhouse-s2-r1:
-    image: yandex/clickhouse-server
+    image: yandex/clickhouse-server:${CLICKHOUSE_TAG}
     ports:
     - "8125:8123"
     - "9002:9000"
@@ -89,7 +89,7 @@ services:
     depends_on: *clickhouse_depends_on
 
   clickhouse-s2-r2:
-    image: yandex/clickhouse-server
+    image: yandex/clickhouse-server:${CLICKHOUSE_TAG}
     ports:
     - "8126:8123"
     - "9003:9000"
@@ -118,7 +118,7 @@ services:
     - clickhouse-s2-r2
 
   jaeger-collector-1:
-    image: levonet/jaeger-collector:latest
+    image: levonet/jaeger-collector:${JAEGER_TAG}
     command: --clickhouse.datasource=tcp://172.16.254.20:9000?database=tracing&alt_hosts=172.16.254.21:9000,172.16.254.22:9000,172.16.254.23:9000 --clickhouse.index-table=jaeger_index_distributed --clickhouse.operations-table=jaeger_operations --clickhouse.spans-table=jaeger_spans_distributed --clickhouse-archive.enabled=true --clickhouse-archive.datasource=tcp://172.16.254.20:9000?database=tracing&alt_hosts=172.16.254.21:9000,172.16.254.22:9000,172.16.254.23:9000 --clickhouse-archive.spans-table=jaeger_archive_spans_distributed
     environment:
       SPAN_STORAGE_TYPE: clickhouse
@@ -133,7 +133,7 @@ services:
     depends_on: *jaeger_depends_on
 
   jaeger-collector-2:
-    image: levonet/jaeger-collector:latest
+    image: levonet/jaeger-collector:${JAEGER_TAG}
     command: --clickhouse.datasource=tcp://172.16.254.22:9000?database=tracing&alt_hosts=172.16.254.23:9000,172.16.254.20:9000,172.16.254.21:9000 --clickhouse.index-table=jaeger_index_distributed --clickhouse.operations-table=jaeger_operations --clickhouse.spans-table=jaeger_spans_distributed --clickhouse-archive.enabled=true --clickhouse-archive.datasource=tcp://172.16.254.22:9000?database=tracing&alt_hosts=172.16.254.23:9000,172.16.254.20:9000,172.16.254.21:9000 --clickhouse-archive.spans-table=jaeger_archive_spans_distributed
     environment:
       SPAN_STORAGE_TYPE: clickhouse
@@ -148,7 +148,7 @@ services:
     depends_on: *jaeger_depends_on
 
   jaeger-agent:
-    image: levonet/jaeger-agent:latest
+    image: levonet/jaeger-agent:${JAEGER_TAG}
     command: --reporter.grpc.host-port=172.16.254.30:14250,172.16.254.31:14250
     ports:
     - "6831:6831/udp"  # accept jaeger.thrift over compact thrift protocol
@@ -164,7 +164,7 @@ services:
     - jaeger-collector-2
 
   jaeger-query-1:
-    image: levonet/jaeger-query:latest
+    image: levonet/jaeger-query:${JAEGER_TAG}
     command: --clickhouse.datasource=tcp://172.16.254.21:9000?database=tracing&alt_hosts=172.16.254.23:9000 --clickhouse.index-table=jaeger_index_distributed --clickhouse.operations-table=jaeger_operations --clickhouse.spans-table=jaeger_spans_distributed --clickhouse-archive.enabled=true --clickhouse-archive.datasource=tcp://172.16.254.21:9000?database=tracing&alt_hosts=172.16.254.23:9000 --clickhouse-archive.spans-table=jaeger_archive_spans_distributed --query.static-files=/opt/jaeger-ui
     environment:
       SPAN_STORAGE_TYPE: clickhouse
@@ -180,7 +180,7 @@ services:
     depends_on: *jaeger_depends_on
 
   jaeger-query-2:
-    image: levonet/jaeger-query:latest
+    image: levonet/jaeger-query:${JAEGER_TAG}
     command: --clickhouse.datasource=tcp://172.16.254.23:9000?database=tracing&alt_hosts=172.16.254.21:9000 --clickhouse.index-table=jaeger_index_distributed --clickhouse.operations-table=jaeger_operations --clickhouse.spans-table=jaeger_spans_distributed --clickhouse-archive.enabled=true --clickhouse-archive.datasource=tcp://172.16.254.23:9000?database=tracing&alt_hosts=172.16.254.21:9000 --clickhouse-archive.spans-table=jaeger_archive_spans_distributed --query.static-files=/opt/jaeger-ui
     environment:
       SPAN_STORAGE_TYPE: clickhouse
@@ -196,7 +196,7 @@ services:
     depends_on: *jaeger_depends_on
 
   nginx:
-    image: levonet/nginx:latest
+    image: levonet/nginx:${NGINX_TAG}
     ports:
     - "8080:8080"
     volumes:

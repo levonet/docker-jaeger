@@ -11,13 +11,13 @@ RUN set -eux \
         make \
     && git clone https://github.com/jaegertracing/jaeger.git /go/src/github.com/jaegertracing/jaeger \
     && cd /go/src/github.com/jaegertracing/jaeger \
+    #
     && git remote add upstream https://github.com/levonet/jaeger.git \
     && git fetch upstream \
     && git checkout upstream/ivan/clickhouse \
-    #
     && git config --global user.email "git@github.com" \
     && git config --global user.name "Trivial" \
-    && git rebase origin $BASE_REF \
+    && git rebase $BASE_REF \
     #
     && git submodule update --init --recursive \
     && export GOOS="$(go env GOOS)" \
@@ -46,7 +46,7 @@ COPY --from=build /go/src/github.com/jaegertracing/jaeger/cmd/collector/collecto
 COPY --from=build /go/src/github.com/jaegertracing/jaeger/cmd/ingester/ingester-linux-amd64 /opt/bin/jaeger-ingester
 COPY --from=build /go/src/github.com/jaegertracing/jaeger/cmd/query/query-linux-amd64 /opt/bin/jaeger-query
 COPY --from=build /go/src/github.com/jaegertracing/jaeger/cmd/tracegen/tracegen-linux-amd64 /opt/bin/tracegen
-COPY --from=build /go/src/github.com/jaegertracing/jaeger/cmd/anonymizer/anonymizer-linux-amd64 /opt/opt/anonymizer
+COPY --from=build /go/src/github.com/jaegertracing/jaeger/cmd/anonymizer/anonymizer-linux-amd64 /opt/bin/anonymizer
 COPY --from=build /go/src/github.com/jaegertracing/jaeger/jaeger-ui/packages/jaeger-ui/build /opt/jaeger-ui
 
 EXPOSE 6831/udp
