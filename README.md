@@ -16,7 +16,7 @@ You can run specific build and publish steps with the appropriate `make build` a
 In order to build and publish a specific version, you need to define the version in environment variables.
 
 ```sh
-BASE_REF=refs/tags/v1.23.0 DOCKER_TAG=1.23.0 make
+BASE_REF=refs/tags/v1.24.0 DOCKER_TAG=1.24.0 make
 ```
 
 # Example
