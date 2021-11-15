@@ -1,9 +1,9 @@
 <?xml version="1.0"?>
 <yandex>
     <remote_servers replace="1">
-        <busfor_cluster>
+        <cluster>
             <shard>
-                <internal_replication>True</internal_replication>
+                <internal_replication>true</internal_replication>
                 <replica>
                     <host>172.16.254.20</host>
                     <port>9000</port>
@@ -14,7 +14,7 @@
                 </replica>
             </shard>
             <shard>
-                <internal_replication>True</internal_replication>
+                <internal_replication>true</internal_replication>
                 <replica>
                     <host>172.16.254.22</host>
                     <port>9000</port>
@@ -24,6 +24,6 @@
                     <port>9000</port>
                 </replica>
             </shard>
-        </busfor_cluster>
+        </cluster>
     </remote_servers>
 </yandex>

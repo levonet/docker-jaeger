@@ -1,5 +1,6 @@
+JAEGER_VERSION?=master
+JAEGER_CLICKHOUSE_VERSION?=main
 DOCKER_TAG?=latest
-BASE_REF?=refs/heads/master
 
 .PHONY: all
 all: build push
@@ -11,7 +12,8 @@ build: build-jaeger build-jaeger-agent build-jaeger-collector build-jaeger-inges
 build-jaeger:
 	docker build \
 		--progress plain \
-		--build-arg BASE_REF=$(BASE_REF) \
+		--build-arg JAEGER_VERSION=$(JAEGER_VERSION) \
+		--build-arg JAEGER_CLICKHOUSE_VERSION=$(JAEGER_CLICKHOUSE_VERSION) \
 		-t levonet/jaeger:${DOCKER_TAG} \
 		.
 

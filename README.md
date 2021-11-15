@@ -1,8 +1,8 @@
 # Jaeger Docker images
 
-These Jaeger Docker images contain a [clickhouse plugin](https://github.com/jaegertracing/jaeger/compare/master...bobrik:ivan/clickhouse) [#issues/1438](https://github.com/jaegertracing/jaeger/issues/1438) for test use.
+These Jaeger Docker images contain a [clickhouse plugin](https://github.com/jaegertracing/jaeger-clickhouse).
 
-- [levonet/jaeger](https://hub.docker.com/r/levonet/jaeger) (all-in-one) — Designed for quick local testing. It launches the Jaeger UI, collector, query, and agent, with an in-memory storage component.
+- [levonet/jaeger](https://hub.docker.com/r/levonet/jaeger) (all-in-one) — Designed for quick local testing. It launches the Jaeger UI, collector, query, and agent.
 - [levonet/jaeger-agent](https://hub.docker.com/r/levonet/jaeger-agent) — Receives spans from Jaeger clients and forwards to collector. Designed to run as a sidecar or a host agent.
 - [levonet/jaeger-collector](https://hub.docker.com/r/levonet/jaeger-collector) — Receives spans from agents or directly from clients and saves them in persistent storage.
 - [levonet/jaeger-ingester](https://hub.docker.com/r/levonet/jaeger-ingester) — An alternative to collector; reads spans from Kafka topic and saves them to storage.
@@ -10,13 +10,14 @@ These Jaeger Docker images contain a [clickhouse plugin](https://github.com/jaeg
 
 # Build and publish
 
-The `make` command builds and publishes the latest state of the [jaegertracing/jaeger](https://github.com/jaegertracing/jaeger) repository with the [clickhouse](https://github.com/levonet/jaeger/compare/master...levonet:ivan/clickhouse) plugin.
+The `make` command builds and publishes the latest state of the [jaegertracing/jaeger](https://github.com/jaegertracing/jaeger) repository with the [clickhouse plugin](https://github.com/jaegertracing/jaeger-clickhouse).
 You can run specific build and publish steps with the appropriate `make build` and` make push` commands.
 
 In order to build and publish a specific version, you need to define the version in environment variables.
 
 ```sh
-BASE_REF=refs/tags/v1.23.0 DOCKER_TAG=1.23.0 make
+JAEGER_VERSION=v1.28.0 JAEGER_CLICKHOUSE_VERSION=0.8.0 DOCKER_TAG=1.28.0 make build
+DOCKER_TAG=1.28.0 make push
 ```
 
 # Example

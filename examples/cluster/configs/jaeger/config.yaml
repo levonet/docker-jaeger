@@ -1,0 +1,6 @@
+---
+address: tcp://172.16.254.100:9009
+replication: true
+# Flush on every write for test purposes
+batch_write_size: 1
+batch_flush_interval: 1s
