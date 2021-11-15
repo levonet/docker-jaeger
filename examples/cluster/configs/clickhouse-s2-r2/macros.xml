@@ -1,6 +1,7 @@
 <?xml version="1.0"?>
 <yandex>
     <macros replace="1">
+        <cluster>cluster</cluster>
         <shard>2</shard>
         <replica>2</replica>
     </macros>

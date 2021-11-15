@@ -1,7 +1,7 @@
 ARG DOCKER_TAG=latest
 FROM levonet/jaeger:${DOCKER_TAG} AS all-in-one
 
-FROM debian:buster-slim
+FROM debian:bullseye-slim
 
 COPY --from=all-in-one /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
 COPY --from=all-in-one /opt/bin/jaeger-agent /opt/bin/jaeger-agent

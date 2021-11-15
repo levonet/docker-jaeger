@@ -102,15 +102,21 @@ services:
         ipv4_address: 172.16.254.23
     depends_on: *clickhouse_depends_on
 
-  init-db:
-    build: ./init-db
-    command: /usr/local/bin/dockerize -wait tcp://172.16.254.20:8123 -wait tcp://172.16.254.21:8123 -wait tcp://172.16.254.22:8123 -wait tcp://172.16.254.23:8123 -timeout 60s /init-db.sh
-    environment:
-      INIT_DB_HOSTS: 172.16.254.20 172.16.254.21 172.16.254.22 172.16.254.23
+  nginx:
+    image: levonet/nginx:${NGINX_TAG}
+    expose:
+    - "8080"
+    - "9009"
+    ports:
+    - "8080:8080"
+    - "9009:9009"
     volumes:
-    - ./sql:/sql
+    - ./configs/nginx/nginx.conf:/etc/nginx/nginx.conf
+    - ./configs/nginx/jaeger-config.yaml:/etc/nginx/jaeger-config.yaml
+    restart: on-failure
     networks:
-    - jaeger-cluster
+      jaeger-cluster:
+        ipv4_address: 172.16.254.100
     depends_on: &jaeger_depends_on
     - clickhouse-s1-r1
     - clickhouse-s1-r2
@@ -119,13 +125,12 @@ services:
 
   jaeger-collector-1:
     image: levonet/jaeger-collector:${JAEGER_TAG}
-    command: --clickhouse.datasource=tcp://172.16.254.20:9000?database=tracing&alt_hosts=172.16.254.21:9000,172.16.254.22:9000,172.16.254.23:9000 --clickhouse.index-table=jaeger_index_distributed --clickhouse.operations-table=jaeger_operations --clickhouse.spans-table=jaeger_spans_distributed --clickhouse-archive.enabled=true --clickhouse-archive.datasource=tcp://172.16.254.20:9000?database=tracing&alt_hosts=172.16.254.21:9000,172.16.254.22:9000,172.16.254.23:9000 --clickhouse-archive.spans-table=jaeger_archive_spans_distributed
-    environment:
-      SPAN_STORAGE_TYPE: clickhouse
     ports:
     - "14250:14250"  # accept model.proto
     - "14268:14268"  # accept jaeger.thrift directly from clients
     - "14269:14269"  # admin (health check, /metrics, etc.)
+    volumes:
+    - ./configs/jaeger/config.yaml:/opt/jaeger/config.yaml
     restart: on-failure
     networks:
       jaeger-cluster:
@@ -134,13 +139,12 @@ services:
 
   jaeger-collector-2:
     image: levonet/jaeger-collector:${JAEGER_TAG}
-    command: --clickhouse.datasource=tcp://172.16.254.22:9000?database=tracing&alt_hosts=172.16.254.23:9000,172.16.254.20:9000,172.16.254.21:9000 --clickhouse.index-table=jaeger_index_distributed --clickhouse.operations-table=jaeger_operations --clickhouse.spans-table=jaeger_spans_distributed --clickhouse-archive.enabled=true --clickhouse-archive.datasource=tcp://172.16.254.22:9000?database=tracing&alt_hosts=172.16.254.23:9000,172.16.254.20:9000,172.16.254.21:9000 --clickhouse-archive.spans-table=jaeger_archive_spans_distributed
-    environment:
-      SPAN_STORAGE_TYPE: clickhouse
     ports:
     - "24250:14250"  # accept model.proto
     - "24268:14268"  # accept jaeger.thrift directly from clients
     - "24269:14269"  # admin (health check, /metrics, etc.)
+    volumes:
+    - ./configs/jaeger/config.yaml:/opt/jaeger/config.yaml
     restart: on-failure
     networks:
       jaeger-cluster:
@@ -165,14 +169,14 @@ services:
 
   jaeger-query-1:
     image: levonet/jaeger-query:${JAEGER_TAG}
-    command: --clickhouse.datasource=tcp://172.16.254.21:9000?database=tracing&alt_hosts=172.16.254.23:9000 --clickhouse.index-table=jaeger_index_distributed --clickhouse.operations-table=jaeger_operations --clickhouse.spans-table=jaeger_spans_distributed --clickhouse-archive.enabled=true --clickhouse-archive.datasource=tcp://172.16.254.21:9000?database=tracing&alt_hosts=172.16.254.23:9000 --clickhouse-archive.spans-table=jaeger_archive_spans_distributed --query.static-files=/opt/jaeger-ui
     environment:
-      SPAN_STORAGE_TYPE: clickhouse
       JAEGER_AGENT_HOST: 172.16.254.40
       JAEGER_AGENT_PORT: "6831"
     ports:
     - "16686:16686"  # serve frontend
     - "16687:16687"  # admin (health check, /metrics, etc.)
+    volumes:
+    - ./configs/jaeger/config.yaml:/opt/jaeger/config.yaml
     restart: on-failure
     networks:
       jaeger-cluster:
@@ -181,34 +185,19 @@ services:
 
   jaeger-query-2:
     image: levonet/jaeger-query:${JAEGER_TAG}
-    command: --clickhouse.datasource=tcp://172.16.254.23:9000?database=tracing&alt_hosts=172.16.254.21:9000 --clickhouse.index-table=jaeger_index_distributed --clickhouse.operations-table=jaeger_operations --clickhouse.spans-table=jaeger_spans_distributed --clickhouse-archive.enabled=true --clickhouse-archive.datasource=tcp://172.16.254.23:9000?database=tracing&alt_hosts=172.16.254.21:9000 --clickhouse-archive.spans-table=jaeger_archive_spans_distributed --query.static-files=/opt/jaeger-ui
     environment:
-      SPAN_STORAGE_TYPE: clickhouse
       JAEGER_AGENT_HOST: 172.16.254.40
       JAEGER_AGENT_PORT: "6831"
     ports:
     - "26686:16686"  # serve frontend
     - "26687:16687"  # admin (health check, /metrics, etc.)
+    volumes:
+    - ./configs/jaeger/config.yaml:/opt/jaeger/config.yaml
     restart: on-failure
     networks:
       jaeger-cluster:
         ipv4_address: 172.16.254.51
     depends_on: *jaeger_depends_on
-
-  nginx:
-    image: levonet/nginx:${NGINX_TAG}
-    ports:
-    - "8080:8080"
-    volumes:
-    - ./nginx.conf:/etc/nginx/nginx.conf
-    - ./jaeger-config.yaml:/etc/nginx/jaeger-config.yaml
-    restart: on-failure
-    networks:
-      jaeger-cluster:
-        ipv4_address: 172.16.254.100
-    depends_on:
-    - jaeger-query-1
-    - jaeger-query-2
 
 networks:
   jaeger-cluster:
