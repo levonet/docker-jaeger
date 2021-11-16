@@ -140,6 +140,9 @@ jobs:
       uses: docker/build-push-action@v2
       with:
         context: .
+        build-args: |
+          JAEGER_VERSION=${{ steps.tags.outputs.jaeger || 'master' }}
+          JAEGER_CLICKHOUSE_VERSION=${{ steps.tags.outputs.jaeger-clickhouse || 'main' }}
         push: true
         tags: ${{ steps.meta-jaeger.outputs.tags }}
         labels: ${{ steps.meta-jaeger.outputs.labels }}
@@ -149,6 +152,8 @@ jobs:
       uses: docker/build-push-action@v2
       with:
         context: agent
+        build-args: |
+          DOCKER_TAG=${{ fromJSON(steps.meta-jaeger.outputs.json).tags[0] }}
         push: true
         tags: ${{ steps.meta-jaeger-agent.outputs.tags }}
         labels: ${{ steps.meta-jaeger-agent.outputs.labels }}
@@ -157,7 +162,9 @@ jobs:
       # if: ${{ github.event_name != 'pull_request' }}
       uses: docker/build-push-action@v2
       with:
-        context: .
+        context: collector
+        build-args: |
+          DOCKER_TAG=${{ fromJSON(steps.meta-jaeger.outputs.json).tags[0] }}
         push: true
         tags: ${{ steps.meta-jaeger-collector.outputs.tags }}
         labels: ${{ steps.meta-jaeger-collector.outputs.labels }}
@@ -166,7 +173,9 @@ jobs:
       # if: ${{ github.event_name != 'pull_request' }}
       uses: docker/build-push-action@v2
       with:
-        context: .
+        context: ingester
+        build-args: |
+          DOCKER_TAG=${{ fromJSON(steps.meta-jaeger.outputs.json).tags[0] }}
         push: true
         tags: ${{ steps.meta-jaeger-ingester.outputs.tags }}
         labels: ${{ steps.meta-jaeger-ingester.outputs.labels }}
@@ -175,7 +184,9 @@ jobs:
       # if: ${{ github.event_name != 'pull_request' }}
       uses: docker/build-push-action@v2
       with:
-        context: .
+        context: query
+        build-args: |
+          DOCKER_TAG=${{ fromJSON(steps.meta-jaeger.outputs.json).tags[0] }}
         push: true
         tags: ${{ steps.meta-jaeger-query.outputs.tags }}
         labels: ${{ steps.meta-jaeger-query.outputs.labels }}
