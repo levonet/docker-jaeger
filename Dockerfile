@@ -1,7 +1,8 @@
-FROM golang:1.17-bullseye AS build
+FROM golang:1.17-stretch AS build
 
 ARG JAEGER_VERSION master
 ARG JAEGER_CLICKHOUSE_VERSION main
+ENV GOBUILD "go build -ldflags '-linkmode=external' -trimpath"
 
 RUN set -eux \
     && apt-get update \
@@ -26,26 +27,27 @@ RUN set -eux \
     && export GOOS="$(go env GOOS)" \
     && go install github.com/mjibson/esc@v0.2.0 \
     && make build-ui \
-    && make build-platform-binaries \
+    #
+    && make -e build-platform-binaries \
     && strip \
         cmd/all-in-one/all-in-one-linux-amd64 \
         cmd/agent/agent-linux-amd64 \
+        cmd/anonymizer/anonymizer-linux-amd64 \
         cmd/collector/collector-linux-amd64 \
         cmd/ingester/ingester-linux-amd64 \
         cmd/query/query-linux-amd64 \
-        cmd/tracegen/tracegen-linux-amd64 \
-        cmd/anonymizer/anonymizer-linux-amd64
+        cmd/tracegen/tracegen-linux-amd64
 
 RUN set -eux \
     && git clone --depth=1 --single-branch -b ${JAEGER_CLICKHOUSE_VERSION} \
         https://github.com/jaegertracing/jaeger-clickhouse.git \
         /go/src/github.com/jaegertracing/jaeger-clickhouse \
     && cd /go/src/github.com/jaegertracing/jaeger-clickhouse \
-    && make build \
+    && make -e build \
     && strip \
         jaeger-clickhouse-linux-amd64
 
-FROM debian:bullseye-slim
+FROM debian:stretch-slim
 
 COPY --from=build /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
 COPY --from=build /go/src/github.com/jaegertracing/jaeger/cmd/agent/agent-linux-amd64 /opt/bin/jaeger-agent
