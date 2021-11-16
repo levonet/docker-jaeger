@@ -90,7 +90,7 @@ jobs:
         build-args: |
           JAEGER_VERSION=${{ steps.tags.outputs.jaeger || 'master' }}
           JAEGER_CLICKHOUSE_VERSION=${{ steps.tags.outputs.jaeger-clickhouse || 'main' }}
-        load: true
+        # load: true
         push: true
         # push: ${{ github.event_name != 'pull_request' }}
         # tags: ${{ fromJSON(steps.meta-jaeger.outputs.json).tags[0] }}
@@ -103,7 +103,7 @@ jobs:
         context: agent
         build-args: |
           DOCKER_TAG=${{ fromJSON(steps.meta-jaeger.outputs.json).tags[0] }}
-        load: true
+        # load: true
         push: true
         # push: ${{ github.event_name != 'pull_request' }}
         # tags: ${{ fromJSON(steps.meta-jaeger-agent.outputs.json).tags[0] }}
@@ -116,7 +116,7 @@ jobs:
         context: collector
         build-args: |
           DOCKER_TAG=${{ fromJSON(steps.meta-jaeger.outputs.json).tags[0] }}
-        load: true
+        # load: true
         push: true
         # push: ${{ github.event_name != 'pull_request' }}
         # tags: ${{ fromJSON(steps.meta-jaeger-collector.outputs.json).tags[0] }}
@@ -129,7 +129,7 @@ jobs:
         context: ingester
         build-args: |
           DOCKER_TAG=${{ fromJSON(steps.meta-jaeger.outputs.json).tags[0] }}
-        load: true
+        # load: true
         push: true
         # push: ${{ github.event_name != 'pull_request' }}
         # tags: ${{ fromJSON(steps.meta-jaeger-ingester.outputs.json).tags[0] }}
@@ -142,7 +142,7 @@ jobs:
         context: query
         build-args: |
           DOCKER_TAG=${{ fromJSON(steps.meta-jaeger.outputs.json).tags[0] }}
-        load: true
+        # load: true
         push: true
         # push: ${{ github.event_name != 'pull_request' }}
         # tags: ${{ fromJSON(steps.meta-jaeger-query.outputs.json).tags[0] }}
