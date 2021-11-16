@@ -191,42 +191,42 @@ jobs:
         tags: ${{ steps.meta-jaeger-query.outputs.tags }}
         labels: ${{ steps.meta-jaeger-query.outputs.labels }}
 
-    - name: Docker Hub Description
+    - name: Docker Hub Description for jaeger
       # if: ${{ github.event_name != 'pull_request' }}
       uses: peter-evans/dockerhub-description@v2
       with:
         username: ${{ env.DOCKERHUB_USERNAME }}
-        password: ${{ secrets.DOCKERHUB_PASSWORD }}
+        password: ${{ secrets.DOCKERHUB_TOKEN }}
         repository: levonet/jaeger
 
-    - name: Docker Hub Description
+    - name: Docker Hub Description for jaeger-agent
       # if: ${{ github.event_name != 'pull_request' }}
       uses: peter-evans/dockerhub-description@v2
       with:
         username: ${{ env.DOCKERHUB_USERNAME }}
-        password: ${{ secrets.DOCKERHUB_PASSWORD }}
+        password: ${{ secrets.DOCKERHUB_TOKEN }}
         repository: levonet/jaeger-agent
 
-    - name: Docker Hub Description
+    - name: Docker Hub Description for jaeger-collector
       # if: ${{ github.event_name != 'pull_request' }}
       uses: peter-evans/dockerhub-description@v2
       with:
         username: ${{ env.DOCKERHUB_USERNAME }}
-        password: ${{ secrets.DOCKERHUB_PASSWORD }}
+        password: ${{ secrets.DOCKERHUB_TOKEN }}
         repository: levonet/jaeger-collector
 
-    - name: Docker Hub Description
+    - name: Docker Hub Description for jaeger-ingester
       # if: ${{ github.event_name != 'pull_request' }}
       uses: peter-evans/dockerhub-description@v2
       with:
         username: ${{ env.DOCKERHUB_USERNAME }}
-        password: ${{ secrets.DOCKERHUB_PASSWORD }}
+        password: ${{ secrets.DOCKERHUB_TOKEN }}
         repository: levonet/jaeger-ingester
 
-    - name: Docker Hub Description
+    - name: Docker Hub Description for jaeger-query
       # if: ${{ github.event_name != 'pull_request' }}
       uses: peter-evans/dockerhub-description@v2
       with:
         username: ${{ env.DOCKERHUB_USERNAME }}
-        password: ${{ secrets.DOCKERHUB_PASSWORD }}
+        password: ${{ secrets.DOCKERHUB_TOKEN }}
         repository: levonet/jaeger-query
