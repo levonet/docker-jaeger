@@ -16,8 +16,8 @@ You can run specific build and publish steps with the appropriate `make build` a
 In order to build and publish a specific version, you need to define the version in environment variables.
 
 ```sh
-JAEGER_VERSION=v1.28.0 JAEGER_CLICKHOUSE_VERSION=0.8.0 DOCKER_TAG=latest make build
-DOCKER_TAG=latest make push
+JAEGER_VERSION=v1.28.0 JAEGER_CLICKHOUSE_VERSION=0.8.0 IMAGE_VERSION=latest make build
+IMAGE_VERSION=latest make push
 ```
 
 # Example

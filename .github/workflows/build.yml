@@ -77,7 +77,6 @@ jobs:
         flavor: ${{ env.METADATA_FLAVOR }}
 
     - name: Login to DockerHub
-      # if: ${{ github.event_name != 'pull_request' }}
       uses: docker/login-action@v1
       with:
         username: ${{ env.DOCKERHUB_USERNAME }}
@@ -90,10 +89,7 @@ jobs:
         build-args: |
           JAEGER_VERSION=${{ steps.tags.outputs.jaeger || 'master' }}
           JAEGER_CLICKHOUSE_VERSION=${{ steps.tags.outputs.jaeger-clickhouse || 'main' }}
-        # load: true
         push: true
-        # push: ${{ github.event_name != 'pull_request' }}
-        # tags: ${{ fromJSON(steps.meta-jaeger.outputs.json).tags[0] }}
         tags: ${{ steps.meta-jaeger.outputs.tags }}
         labels: ${{ steps.meta-jaeger.outputs.labels }}
 
@@ -103,10 +99,7 @@ jobs:
         context: agent
         build-args: |
           DOCKER_TAG=${{ fromJSON(steps.meta-jaeger.outputs.json).tags[0] }}
-        # load: true
         push: true
-        # push: ${{ github.event_name != 'pull_request' }}
-        # tags: ${{ fromJSON(steps.meta-jaeger-agent.outputs.json).tags[0] }}
         tags: ${{ steps.meta-jaeger-agent.outputs.tags }}
         labels: ${{ steps.meta-jaeger-agent.outputs.labels }}
 
@@ -116,10 +109,7 @@ jobs:
         context: collector
         build-args: |
           DOCKER_TAG=${{ fromJSON(steps.meta-jaeger.outputs.json).tags[0] }}
-        # load: true
         push: true
-        # push: ${{ github.event_name != 'pull_request' }}
-        # tags: ${{ fromJSON(steps.meta-jaeger-collector.outputs.json).tags[0] }}
         tags: ${{ steps.meta-jaeger-collector.outputs.tags }}
         labels: ${{ steps.meta-jaeger-collector.outputs.labels }}
 
@@ -129,10 +119,7 @@ jobs:
         context: ingester
         build-args: |
           DOCKER_TAG=${{ fromJSON(steps.meta-jaeger.outputs.json).tags[0] }}
-        # load: true
         push: true
-        # push: ${{ github.event_name != 'pull_request' }}
-        # tags: ${{ fromJSON(steps.meta-jaeger-ingester.outputs.json).tags[0] }}
         tags: ${{ steps.meta-jaeger-ingester.outputs.tags }}
         labels: ${{ steps.meta-jaeger-ingester.outputs.labels }}
 
@@ -142,77 +129,12 @@ jobs:
         context: query
         build-args: |
           DOCKER_TAG=${{ fromJSON(steps.meta-jaeger.outputs.json).tags[0] }}
-        # load: true
         push: true
-        # push: ${{ github.event_name != 'pull_request' }}
-        # tags: ${{ fromJSON(steps.meta-jaeger-query.outputs.json).tags[0] }}
         tags: ${{ steps.meta-jaeger-query.outputs.tags }}
         labels: ${{ steps.meta-jaeger-query.outputs.labels }}
 
-    # - name: Run test
-    #   env:
-    #     JAEGER_TAG: ${{ fromJSON(steps.meta-jaeger.outputs.json).tags[0] }}
-    #   run: |
-    #     make test
-
-    # - name: Build and push jaeger
-    #   # if: ${{ github.event_name != 'pull_request' }}
-    #   uses: docker/build-push-action@v2
-    #   with:
-    #     context: .
-    #     build-args: |
-    #       JAEGER_VERSION=${{ steps.tags.outputs.jaeger || 'master' }}
-    #       JAEGER_CLICKHOUSE_VERSION=${{ steps.tags.outputs.jaeger-clickhouse || 'main' }}
-    #     push: true
-    #     tags: ${{ steps.meta-jaeger.outputs.tags }}
-    #     labels: ${{ steps.meta-jaeger.outputs.labels }}
-
-    # - name: Build and push jaeger-agent
-    #   # if: ${{ github.event_name != 'pull_request' }}
-    #   uses: docker/build-push-action@v2
-    #   with:
-    #     context: agent
-    #     build-args: |
-    #       DOCKER_TAG=${{ fromJSON(steps.meta-jaeger.outputs.json).tags[0] }}
-    #     push: true
-    #     tags: ${{ steps.meta-jaeger-agent.outputs.tags }}
-    #     labels: ${{ steps.meta-jaeger-agent.outputs.labels }}
-
-    # - name: Build and push jaeger-collector
-    #   # if: ${{ github.event_name != 'pull_request' }}
-    #   uses: docker/build-push-action@v2
-    #   with:
-    #     context: collector
-    #     build-args: |
-    #       DOCKER_TAG=${{ fromJSON(steps.meta-jaeger.outputs.json).tags[0] }}
-    #     push: true
-    #     tags: ${{ steps.meta-jaeger-collector.outputs.tags }}
-    #     labels: ${{ steps.meta-jaeger-collector.outputs.labels }}
-
-    # - name: Build and push jaeger-ingester
-    #   # if: ${{ github.event_name != 'pull_request' }}
-    #   uses: docker/build-push-action@v2
-    #   with:
-    #     context: ingester
-    #     build-args: |
-    #       DOCKER_TAG=${{ fromJSON(steps.meta-jaeger.outputs.json).tags[0] }}
-    #     push: true
-    #     tags: ${{ steps.meta-jaeger-ingester.outputs.tags }}
-    #     labels: ${{ steps.meta-jaeger-ingester.outputs.labels }}
-
-    # - name: Build and push jaeger-query
-    #   # if: ${{ github.event_name != 'pull_request' }}
-    #   uses: docker/build-push-action@v2
-    #   with:
-    #     context: query
-    #     build-args: |
-    #       DOCKER_TAG=${{ fromJSON(steps.meta-jaeger.outputs.json).tags[0] }}
-    #     push: true
-    #     tags: ${{ steps.meta-jaeger-query.outputs.tags }}
-    #     labels: ${{ steps.meta-jaeger-query.outputs.labels }}
-
     - name: Docker Hub Description for jaeger
-      # if: ${{ github.ref_name == github.event.repository.default_branch }}
+      if: ${{ github.ref_name == github.event.repository.default_branch }}
       uses: peter-evans/dockerhub-description@v2
       with:
         username: ${{ env.DOCKERHUB_USERNAME }}
@@ -220,7 +142,7 @@ jobs:
         repository: levonet/jaeger
 
     - name: Docker Hub Description for jaeger-agent
-      # if: ${{ github.ref_name == github.event.repository.default_branch }}
+      if: ${{ github.ref_name == github.event.repository.default_branch }}
       uses: peter-evans/dockerhub-description@v2
       with:
         username: ${{ env.DOCKERHUB_USERNAME }}
@@ -228,7 +150,7 @@ jobs:
         repository: levonet/jaeger-agent
 
     - name: Docker Hub Description for jaeger-collector
-      # if: ${{ github.ref_name == github.event.repository.default_branch }}
+      if: ${{ github.ref_name == github.event.repository.default_branch }}
       uses: peter-evans/dockerhub-description@v2
       with:
         username: ${{ env.DOCKERHUB_USERNAME }}
@@ -236,7 +158,7 @@ jobs:
         repository: levonet/jaeger-collector
 
     - name: Docker Hub Description for jaeger-ingester
-      # if: ${{ github.ref_name == github.event.repository.default_branch }}
+      if: ${{ github.ref_name == github.event.repository.default_branch }}
       uses: peter-evans/dockerhub-description@v2
       with:
         username: ${{ env.DOCKERHUB_USERNAME }}
@@ -244,7 +166,7 @@ jobs:
         repository: levonet/jaeger-ingester
 
     - name: Docker Hub Description for jaeger-query
-      # if: ${{ github.ref_name == github.event.repository.default_branch }}
+      if: ${{ github.ref_name == github.event.repository.default_branch }}
       uses: peter-evans/dockerhub-description@v2
       with:
         username: ${{ env.DOCKERHUB_USERNAME }}
