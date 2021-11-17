@@ -32,9 +32,9 @@ jobs:
       uses: actions/github-script@v4
       with:
         script: |
-          const tags = context.ref_name.split('-')
-          setOutput('jaeger', tags[0])
-          setOutput('jaeger-clickhouse', tags[1])
+          const tags = context.ref.split('/').slice(2).join('/').split('-')
+          core.setOutput('jaeger', tags[0])
+          core.setOutput('jaeger-clickhouse', tags[1])
 
     - name: Docker meta jaeger
       id: meta-jaeger
