@@ -19,7 +19,7 @@ jobs:
         type=semver,pattern={{version}}
         type=match,pattern=v(\d+.\d+.\d+),group=1
       METADATA_FLAVOR: |
-        latest=auto
+        latest=${{ github.ref_type == 'tag' }}
         suffix=-stretch,onlatest=false
     steps:
 
