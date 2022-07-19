@@ -44,7 +44,7 @@ services:
         ipv4_address: 172.16.254.12
 
   clickhouse-s1-r1:
-    image: yandex/clickhouse-server:${CLICKHOUSE_TAG}
+    image: clickhouse/clickhouse-server:${CLICKHOUSE_TAG}
     ports:
     - "8123:8123"
     - "9000:9000"
@@ -61,7 +61,7 @@ services:
     - zookeeper-3
 
   clickhouse-s1-r2:
-    image: yandex/clickhouse-server:${CLICKHOUSE_TAG}
+    image: clickhouse/clickhouse-server:${CLICKHOUSE_TAG}
     ports:
     - "8124:8123"
     - "9001:9000"
@@ -75,7 +75,7 @@ services:
     depends_on: *clickhouse_depends_on
 
   clickhouse-s2-r1:
-    image: yandex/clickhouse-server:${CLICKHOUSE_TAG}
+    image: clickhouse/clickhouse-server:${CLICKHOUSE_TAG}
     ports:
     - "8125:8123"
     - "9002:9000"
@@ -89,7 +89,7 @@ services:
     depends_on: *clickhouse_depends_on
 
   clickhouse-s2-r2:
-    image: yandex/clickhouse-server:${CLICKHOUSE_TAG}
+    image: clickhouse/clickhouse-server:${CLICKHOUSE_TAG}
     ports:
     - "8126:8123"
     - "9003:9000"

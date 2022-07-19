@@ -16,7 +16,7 @@ You can run specific build and publish steps with the appropriate `make build` a
 In order to build and publish a specific version, you need to define the version in environment variables.
 
 ```sh
-JAEGER_VERSION=v1.28.0 JAEGER_CLICKHOUSE_VERSION=0.8.0 IMAGE_VERSION=latest make build
+JAEGER_VERSION=v1.36.0 JAEGER_CLICKHOUSE_VERSION=0.11.0 IMAGE_VERSION=latest make build
 IMAGE_VERSION=latest make push
 ```
 
@@ -44,7 +44,7 @@ Some of these tags may have names like buster in them. These are the suite code 
 
 ## License
 
-View [license information](https://github.com/jaegertracing/jaeger/blob/master/LICENSE) for the software contained in this image or [license information](https://github.com/levonet/docker-jaeger/blob/master/LICENSE) for the Jaeger Dockerfile.
+View [license information](https://github.com/jaegertracing/jaeger/blob/main/LICENSE) for the software contained in this image or [license information](https://github.com/levonet/docker-jaeger/blob/master/LICENSE) for the Jaeger Dockerfile.
 
 As with all Docker images, these likely also contain other software which may be under other licenses (such as Bash, etc from the base distribution, along with any direct or indirect dependencies of the primary software being contained).
 

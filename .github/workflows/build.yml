@@ -87,7 +87,7 @@ jobs:
       with:
         context: .
         build-args: |
-          JAEGER_VERSION=${{ steps.tags.outputs.jaeger || 'master' }}
+          JAEGER_VERSION=${{ steps.tags.outputs.jaeger || 'main' }}
           JAEGER_CLICKHOUSE_VERSION=${{ steps.tags.outputs.jaeger-clickhouse || 'main' }}
         push: true
         tags: ${{ steps.meta-jaeger.outputs.tags }}
