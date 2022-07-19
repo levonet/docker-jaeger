@@ -1,6 +1,6 @@
 FROM golang:1.17-stretch AS build
 
-ARG JAEGER_VERSION master
+ARG JAEGER_VERSION main
 ARG JAEGER_CLICKHOUSE_VERSION main
 ENV GOBUILD "go build -ldflags '-linkmode=external' -trimpath"
 

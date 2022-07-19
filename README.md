@@ -44,7 +44,7 @@ Some of these tags may have names like buster in them. These are the suite code 
 
 ## License
 
-View [license information](https://github.com/jaegertracing/jaeger/blob/master/LICENSE) for the software contained in this image or [license information](https://github.com/levonet/docker-jaeger/blob/master/LICENSE) for the Jaeger Dockerfile.
+View [license information](https://github.com/jaegertracing/jaeger/blob/main/LICENSE) for the software contained in this image or [license information](https://github.com/levonet/docker-jaeger/blob/master/LICENSE) for the Jaeger Dockerfile.
 
 As with all Docker images, these likely also contain other software which may be under other licenses (such as Bash, etc from the base distribution, along with any direct or indirect dependencies of the primary software being contained).
 
